@@ -2,7 +2,7 @@
 
 #define DEFAULT_INTERRUPTION_FREQUENCY_IN_MICROS 7 // 7 is working well
 #define PULSE_DELAY_FOR_SERVO_MICROS 20000 
-#define DEFAULT_DELAY_FOR_MANAGED_SERVO_UPDATE 500000 // half a second
+#define DEFAULT_DELAY_FOR_MANAGED_SERVO_UPDATE 300000
 
 #include <Arduino.h>
 #include <avr/interrupt.h>

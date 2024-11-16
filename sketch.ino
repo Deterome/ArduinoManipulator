@@ -7,6 +7,9 @@
 #define SERVO_MANAGER_PIN 11
 
 MyServo firstServo(0);
+MyServo secondServo(1);
+MyServo thirdServo(2);
+MyServo fourthServo(3);
 ServoManager servoManager(SERVO_MANAGER_PIN, ArduinoList<uint8_t>().chainAdd(4).chainAdd(5).chainAdd(6).chainAdd(7));
 
 ISR(TIMER2_COMPA_vect) {
@@ -15,8 +18,14 @@ ISR(TIMER2_COMPA_vect) {
 
 void setup() {
   servoManager.attachServo(&firstServo);
+  servoManager.attachServo(&secondServo);
+  servoManager.attachServo(&thirdServo);
+  servoManager.attachServo(&fourthServo);
 }
 
 void loop() {
-  firstServo.setServoAngle(90);
+  firstServo.setServoAngle(10);
+  secondServo.setServoAngle(20);
+  thirdServo.setServoAngle(135);
+  fourthServo.setServoAngle(180);
 }

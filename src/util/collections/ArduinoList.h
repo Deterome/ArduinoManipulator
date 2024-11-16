@@ -41,7 +41,7 @@ public:
         arraySize++;
         T* newData = new T[arraySize];
         if (data != nullptr) {
-            for (int elementId = 0; elementId < arraySize - 1; elementId++) {
+            for (size_t elementId = 0; elementId < arraySize - 1; elementId++) {
                 newData[elementId] = data[elementId];
             }
             delete[] data;

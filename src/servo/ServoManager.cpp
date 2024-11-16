@@ -4,8 +4,8 @@ void ServoManager::mainLoop() {
     currentTimeInMicros = micros(); 
     if (currentTimeInMicros - pulseStartTime >= PULSE_DELAY_FOR_SERVO_MICROS) {
         digitalWrite(this->servoManagerPin, HIGH);
-        pulseStartTime = currentTimeInMicros;
-        pulsed = 0;
+        this->pulseStartTime = currentTimeInMicros;
+        this->pulsed = 0;
         if (currentTimeInMicros - this->managedServoChangedTime >= DEFAULT_DELAY_FOR_MANAGED_SERVO_UPDATE) {
             this->managedServoChangedTime = currentTimeInMicros;
             changeManagedServo((this->managedServoId + 1) % this->attachedServos.size());
@@ -22,7 +22,11 @@ ServoManager::ServoManager(uint8_t servoManagerPin, const ArduinoList<uint8_t>& 
 
 ServoManager::ServoManager(uint8_t servoManagerPin, uint16_t angleCheckingFrequencyInMicroseconds, const ArduinoList<uint8_t>& addressPinsOfServos) {
     this->servoManagerPin = servoManagerPin;
-    this->servoAddressPins = addressPinsOfServos;
+    for (uint8_t addressPin = 0; addressPin < addressPinsOfServos.size(); addressPin++) {
+        uint8_t pin = addressPinsOfServos[addressPin];
+        this->servoAddressPins.add(pin);
+        pinMode(pin, OUTPUT);
+    }
     pinMode(servoManagerPin, OUTPUT);
     configureTimer(angleCheckingFrequencyInMicroseconds);
 }
@@ -72,7 +76,7 @@ void ServoManager::resetTimer() {
 void ServoManager::setServoAddress(uint8_t servoDemultiplexerPortId) {
     for (uint8_t addressPinId = 0; addressPinId < this->servoAddressPins.size(); addressPinId++) {
         uint8_t divider = addressPinId == 0 ? 1 : addressPinId * 2;
-        pinMode(this->servoAddressPins[addressPinId], (servoDemultiplexerPortId/divider)%2);
+        digitalWrite(this->servoAddressPins[addressPinId], (servoDemultiplexerPortId/divider)%2);
     }
 }
 
