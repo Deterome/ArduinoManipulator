@@ -3,13 +3,13 @@
 void ServoManager::mainLoop() {
     currentTimeInMicros = micros(); 
     if (currentTimeInMicros - pulseStartTime >= PULSE_DELAY_FOR_SERVO_MICROS) {
-        digitalWrite(this->servoManagerPin, HIGH);
-        this->pulseStartTime = currentTimeInMicros;
-        this->pulsed = 0;
         if (currentTimeInMicros - this->managedServoChangedTime >= DEFAULT_DELAY_FOR_MANAGED_SERVO_UPDATE) {
             this->managedServoChangedTime = currentTimeInMicros;
             changeManagedServo((this->managedServoId + 1) % this->attachedServos.size());
         }
+        this->pulseStartTime = currentTimeInMicros;
+        this->pulsed = 0;
+        digitalWrite(this->servoManagerPin, HIGH);
     } else {
         if (currentTimeInMicros - pulseStartTime >= this->currentPulseWidth && !pulsed) {
             pulsed = 1;

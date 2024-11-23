@@ -1,6 +1,6 @@
 #pragma once
 
-class ArduinoMath {
+class ArduinoDefaultMath {
 
 public:
     static int findGreatestCommonDivisor(int firstNum, int secondNum);

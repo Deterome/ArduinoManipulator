@@ -1,7 +1,6 @@
-#include "ArduinoMath.h"
+#include "ArduinoDefaultMath.h"
 
-int ArduinoMath::findGreatestCommonDivisor(int firstNum, int secondNum)
-{
+int ArduinoDefaultMath::findGreatestCommonDivisor(int firstNum, int secondNum) {
     while (1==1)
     {
         int& minNum = firstNum < secondNum ? firstNum : secondNum;

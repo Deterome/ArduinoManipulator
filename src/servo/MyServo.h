@@ -9,18 +9,25 @@ class MyServo {
 private:
     uint16_t minServoMicros = DEFAULT_MIN_SERVO180_MICROS;
     uint16_t maxServoMicros = DEFAULT_MAX_SERVO180_MICROS;
+    uint16_t lowerAngleLimit;
+    uint16_t upperAngleLimit;
     volatile uint16_t servoAngleInMicros;
+    volatile uint16_t servoAngle;
     uint8_t pinOnDemultiplexer;
 
-    const uint16_t angleToMicros(uint8_t angle);
-    const uint8_t microsToAngle(uint16_t angleInMicros);
+    const uint16_t angleToMicros(uint16_t angle);
+    const uint16_t microsToAngle(uint16_t angleInMicros);
 public:
     MyServo(uint8_t pinOnDemultiplexer);
-    MyServo(uint8_t pinOnDemultiplexer, uint16_t minWidthOfPulse, uint16_t maxWidthOfPulse);
+    MyServo(uint8_t pinOnDemultiplexer, uint16_t lowerAngleLimit, uint16_t upperAngleLimit);
+    MyServo(uint8_t pinOnDemultiplexer, uint16_t lowerAngleLimit, uint16_t upperAngleLimit, uint16_t minWidthOfPulse, uint16_t maxWidthOfPulse);
 
-    uint8_t getServoAngle() const;
+    uint16_t getServoAngle() const;
     uint16_t getServoAngleInMicros() const;
     uint8_t getPinOnDemultiplexer() const;
-    void setServoAngle(uint8_t servoAngle);
+    void rotate(uint16_t rotationAngle);
+    void setServoAngle(uint16_t newServoAngle);
     void setServoAngleInMicros(uint16_t servoAngleInMicros);
+    void setAngleToMax();
+    void setAngleToMin();
 };

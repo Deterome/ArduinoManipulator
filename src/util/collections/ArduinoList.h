@@ -1,8 +1,7 @@
 #pragma once
 
 template <typename T>
-class ArduinoList
-{
+class ArduinoList {
 private:
     size_t arraySize = 0;
     T* data = nullptr;
