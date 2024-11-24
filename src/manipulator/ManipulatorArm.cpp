@@ -9,8 +9,8 @@ uint8_t ManipulatorArm::getLength() const {
     return this->length;
 }
 
-uint8_t ManipulatorArm::getArmAngle() const {
-    return this->servo->getServoAngle();
+MyServo* ManipulatorArm::getArmServo() {
+    return this->servo;
 }
 
 Vector2 ManipulatorArm::getVectorizedArm() const {

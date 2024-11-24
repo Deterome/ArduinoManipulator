@@ -7,10 +7,21 @@ Vector::Vector(const Vector& vector) {
 Vector::Vector(uint8_t coordsCount) {
     this->coordsCount = coordsCount;
     this->coords = new double[coordsCount];
+    for (uint16_t coordId = 0; coordId < coordsCount; coordId++) {
+        this->coords[coordId] = 0;
+    }
 }
 
 Vector::~Vector() {
     delete[] this->coords;
+}
+
+bool Vector::equals(const Vector & vector) {
+    for (uint16_t coordId = 0; coordId < this->coordsCount; coordId++) {
+        if (this->coords[coordId] != vector.coords[coordId]) return false;
+    }
+    
+    return true;
 }
 
 double Vector::getCoordById(uint8_t coordId) const {
@@ -49,6 +60,29 @@ const Vector Vector::operator *(const double num) const {
         multVec.coords[coordId] *= num;
     }
     return multVec;
+}
+
+const Vector Vector::operator/(const double num) const {
+    Vector divVec(*this);
+    for (uint8_t coordId = 0; coordId < this->coordsCount; coordId++) {
+        divVec.coords[coordId] /= num;
+    }
+    return divVec;
+}
+
+const Vector& Vector::operator*=(const double num) const
+{
+    for (uint8_t coordId = 0; coordId < this->coordsCount; coordId++) {
+        this->coords[coordId] *= num;
+    }
+    return *this;
+}
+
+const Vector & Vector::operator /=(const double num) const {
+    for (uint8_t coordId = 0; coordId < this->coordsCount; coordId++) {
+        this->coords[coordId] /= num;
+    }
+    return *this;
 }
 
 Vector& Vector::operator =(const Vector& vector) {

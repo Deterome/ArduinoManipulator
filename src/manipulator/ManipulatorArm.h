@@ -12,6 +12,6 @@ public:
     ManipulatorArm(MyServo* servo, uint8_t length);
 
     uint8_t getLength() const;
-    uint8_t getArmAngle() const;
+    MyServo* getArmServo();
     Vector2 getVectorizedArm() const;
 };

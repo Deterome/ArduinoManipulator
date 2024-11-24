@@ -48,7 +48,7 @@ void MyServo::setAngleToMax() {
 }
 
 void MyServo::setAngleToMin() {
-    this->setServoAngle(this->lowerAngleLimit)
+    this->setServoAngle(this->lowerAngleLimit);
 }
 
 const uint16_t MyServo::angleToMicros(uint16_t angle) {

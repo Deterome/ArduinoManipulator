@@ -13,3 +13,7 @@ int ArduinoDefaultMath::findGreatestCommonDivisor(int firstNum, int secondNum) {
         }
     }
 }
+
+double ArduinoDefaultMath::findRectangleDiameter(double firstSide, double secondSide) {
+    return sqrt(firstSide*firstSide + secondSide*secondSide);
+}
