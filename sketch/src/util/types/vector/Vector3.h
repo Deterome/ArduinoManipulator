@@ -13,4 +13,7 @@ public:
     float getX() const;
     float getY() const;
     float getZ() const;
+    void setX(float value);
+    void setY(float value);
+    void setZ(float value);
 };

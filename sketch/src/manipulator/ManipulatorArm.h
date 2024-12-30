@@ -1,17 +1,14 @@
 #pragma once
 
 #include "../servo/MyServo.h"
-#include "../util/types/vector/Vector2.h"
-#include "../util/math/ArduinoVectorMath.h"
 
 class ManipulatorArm {
 private:
     MyServo* servo;
-    uint8_t length;
+    float length;
 public:
-    ManipulatorArm(MyServo* servo, uint8_t length);
+    ManipulatorArm(MyServo* servo, float length);
 
-    uint8_t getLength() const;
+    float getLength() const;
     MyServo* getArmServo();
-    Vector2 getVectorizedArm() const;
 };

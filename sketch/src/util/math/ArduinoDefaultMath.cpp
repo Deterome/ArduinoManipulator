@@ -17,3 +17,17 @@ int ArduinoDefaultMath::findGreatestCommonDivisor(const int firstNum, const int 
 float ArduinoDefaultMath::findRectangleDiameter(const float firstSide, const float secondSide) {
     return sqrt(firstSide*firstSide + secondSide*secondSide);
 }
+
+float ArduinoDefaultMath::map(float value, float min, float max) {
+    float diff = max - min;
+    if (value < min) {
+        while (value < min) {
+            value += diff;
+        }
+    } else if (value > max) {
+        while (value > max) {
+            value -= diff;
+        }
+    }
+    return value;
+}

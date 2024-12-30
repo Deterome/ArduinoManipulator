@@ -26,13 +26,15 @@ bool isAccidentallyTriggered = true;
 uint32_t currentTimeInMillis;
 uint32_t nextTimeToMeasureInMillis;
 Button grabButton(16);
-uint8_t manipulatorReceiverMacAddress[] = {0x50, 0x02, 0x91, 0xE4, 0x5F, 0xAB};
+uint8_t manipulatorReceiverMacAddress[] = {0xC4, 0xD8, 0xD5, 0x02, 0x2A, 0x93}; //C4:D8:D5:02:2A:93
 uint32_t nextTimeToSendMovementInMillis = 0;
 
 // Структура для приема данных
 typedef struct ManipulatorControlPanelMessage {
   String action;
-  String value;
+  float movementX;
+  float movementY;
+  float movementZ;
 } ManipulatorControlPanelMessage;
 
 void setupMpu() {
@@ -50,8 +52,10 @@ void setupMpu() {
 
 void setupGrabButton() {
   pinMode(16, INPUT);
-  grabButton.setOnPressFunc(onGrabButtonPressed);
+  grabButton.setOnPressFunc(onGrabButtonPressedOnce);
+  grabButton.setOnPressFunc(onGrabButtonPressedTwice, 2);
   grabButton.setOnHoldFunc(onGrabButtonHolded);
+  grabButton.setOnHoldFunc(onGrabButtonPressedAndHolded, 1);
 }
 
 void setupWiFi() {
@@ -74,12 +78,38 @@ void setup() {
   Serial.begin(115200);
 }
 
-void onGrabButtonPressed() {
-  Serial.println("pressed");
+void sendMovementMessageToManipulator(Vector3 vector) {
+  sendMessageToManipulator(MOVE_ACTION_NAME, vector);
+}
+
+void sendActionMessageToManipulator(String action) {
+  sendMessageToManipulator(action, Vector3::ZERO);
+}
+
+void sendMessageToManipulator(String action, Vector3 vector) {
+  ManipulatorControlPanelMessage message;
+  message.action = action;
+  message.movementX = vector.getX();
+  message.movementY = vector.getY();
+  message.movementZ = vector.getZ();
+  esp_now_send(manipulatorReceiverMacAddress, (uint8_t *)&message, sizeof(message));
+
+}
+
+void onGrabButtonPressedOnce() {
+  sendActionMessageToManipulator(GRAB_ACTION_NAME);
+}
+
+void onGrabButtonPressedTwice() {
+  sendActionMessageToManipulator(RELEASE_ACTION_NAME);
 }
 
 void onGrabButtonHolded() {
-  Serial.println("holded");
+  sendActionMessageToManipulator(SQUEEZE_ACTION_NAME);
+}
+
+void onGrabButtonPressedAndHolded() {
+  sendActionMessageToManipulator(DECOMPRESS_ACTION_NAME);
 }
 
 Vector3 getMpuLinearAcceleration() {
@@ -134,13 +164,6 @@ void processMovement(const Vector3& initialAcceleration, const Vector3& currentA
     movement.setCoordById(coordId, movement.getCoordById(coordId) +
       (currentVelocity.getCoordById(coordId) + newVelocity.getCoordById(coordId)) * deltaTimeInSec / 2);
   }
-  Serial.print(movement.getX()*1000);
-  Serial.print(" ");
-  Serial.print(movement.getY()*1000);
-  Serial.print(" ");
-  Serial.print(movement.getZ()*1000);
-  Serial.println(" ");
-  movement = Vector3::ZERO; // удалить
   // в следующий рассчётах нужно учитывать то, что они производятся с какой-то начальной скоростью, которая была найдена в ранних рассчётах
   currentVelocity = newVelocity;
 }
@@ -148,12 +171,10 @@ void processMovement(const Vector3& initialAcceleration, const Vector3& currentA
 void loop() {
   grabButton.updateState();
   currentTimeInMillis = millis();
-  if (currentTimeInMillis > nextTimeToSendMovementInMillis) {
+  if (currentTimeInMillis > nextTimeToSendMovementInMillis && movement != Vector3::ZERO) {
     nextTimeToSendMovementInMillis = currentTimeInMillis + MOVEMENT_SEND_TIME_IN_MILLIS;
-    ManipulatorControlPanelMessage movementMessage;
-    movementMessage.action = MOVE_ACTION_NAME;
-    // преобразовать вектор перемещения в строку
-    esp_now_send(receiverMacAddress, (uint8_t *)&myData, sizeof(myData));
+    sendMovementMessageToManipulator(movement);
+    movement = Vector3::ZERO;
   }
   if (isDmpReady && currentTimeInMillis > nextTimeToMeasureInMillis) {
     nextTimeToMeasureInMillis += MEASURE_TIME_IN_MILLIS;

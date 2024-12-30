@@ -13,6 +13,7 @@ public:
 
     Runnable& operator = (const Runnable& runnable) {
         this->func = runnable.func;
+        return *this;
     }
     
     void run() {

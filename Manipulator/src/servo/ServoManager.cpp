@@ -1,0 +1,59 @@
+#include "ServoManager.h"
+
+void ServoManager::mainLoop() {
+    currentTimeInMicros = micros(); 
+    if (currentTimeInMicros - pulseStartTime >= PULSE_DELAY_FOR_SERVO_MICROS) {
+        if (currentTimeInMicros - this->managedServoChangedTime >= DEFAULT_DELAY_FOR_MANAGED_SERVO_UPDATE) {
+            this->managedServoChangedTime = currentTimeInMicros;
+            changeManagedServo((this->managedServoId + 1) % this->attachedServos.size());
+        }
+        this->pulseStartTime = currentTimeInMicros;
+        this->pulsed = 0;
+        digitalWrite(this->servoManagerPin, HIGH);
+    } else {
+        if (currentTimeInMicros - pulseStartTime >= this->currentPulseWidth && !pulsed) {
+            pulsed = 1;
+            digitalWrite(this->servoManagerPin, LOW);
+        }
+    }
+}
+
+ServoManager::ServoManager(uint8_t servoManagerPin, const ArduinoList<uint8_t>& addressPinsOfServos) {
+    this->servoManagerPin = servoManagerPin;
+    for (uint8_t addressPin = 0; addressPin < addressPinsOfServos.size(); addressPin++) {
+        uint8_t pin = addressPinsOfServos.getById(addressPin);
+        this->servoAddressPins.add(pin);
+        pinMode(pin, OUTPUT);
+    }
+    pinMode(servoManagerPin, OUTPUT);
+}
+
+void ServoManager::attachServo(MyServo* servo) {
+    this->attachedServos.add(servo);
+
+    if (this->attachedServos.size() == 1) {
+        changeManagedServo(0);
+    }
+}
+
+void ServoManager::detachServo(MyServo* servo) {
+    this->attachedServos.remove(servo);
+
+    if (this->attachedServos.size() == 0) {
+        this->managedServoId = 0;
+        this->currentPulseWidth = PULSE_DELAY_FOR_SERVO_MICROS;
+    }
+}
+
+void ServoManager::setServoAddress(uint8_t servoDemultiplexerPortId) {
+    for (uint8_t addressPinId = 0; addressPinId < this->servoAddressPins.size(); addressPinId++) {
+        uint8_t divider = addressPinId == 0 ? 1 : addressPinId * 2;
+        digitalWrite(this->servoAddressPins[addressPinId], (servoDemultiplexerPortId/divider)%2);
+    }
+}
+
+void ServoManager::changeManagedServo(uint8_t servoId) {
+    this->managedServoId = servoId;
+    this->setServoAddress(this->attachedServos[servoId]->getPinOnDemultiplexer());
+    this->currentPulseWidth = attachedServos[this->managedServoId]->getServoAngleInMicros();
+}

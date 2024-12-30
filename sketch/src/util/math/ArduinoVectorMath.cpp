@@ -1,6 +1,6 @@
 #include "ArduinoVectorMath.h"
 
-ArduinoList<Vector2> ArduinoVectorMath::findCirclesIntersectionPoints(const Vector2& firstCircleOrigin, const uint16_t firstCircleRadius, const Vector2& secondCircleOrigin, const uint16_t secondCircleRadius)
+ArduinoList<Vector2> ArduinoVectorMath::findCirclesIntersectionPoints(const Vector2& firstCircleOrigin, const float firstCircleRadius, const Vector2& secondCircleOrigin, const float secondCircleRadius)
 {
     ArduinoList<Vector2> intersectionPoints;
     float distanceBetweenFirstAndSecondOrigins = (secondCircleOrigin - firstCircleOrigin).getLength();
@@ -30,7 +30,7 @@ ArduinoList<Vector2> ArduinoVectorMath::findCirclesIntersectionPoints(const Vect
     return intersectionPoints;
 }
 
-Vector2 ArduinoVectorMath::makeVectorFromLengthAndAngle(const uint16_t vectorLength, const int16_t angle) {
+Vector2 ArduinoVectorMath::makeVectorFromLengthAndAngle(const float vectorLength, const float angle) {
     return Vector2(cos(anglesToRadians(angle)) * vectorLength, sin(anglesToRadians(angle)) * vectorLength);
 }
 

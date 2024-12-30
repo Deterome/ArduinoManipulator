@@ -8,8 +8,8 @@
 class ArduinoVectorMath
 {
 public:
-    static ArduinoList<Vector2> findCirclesIntersectionPoints(const Vector2& firstCircleOrigin, const uint16_t firstCircleRadius, const Vector2& secondCircleOrigin, const uint16_t secondCircleRadius);
-    static Vector2 makeVectorFromLengthAndAngle(const uint16_t vectorLength, const int16_t angle);
+    static ArduinoList<Vector2> findCirclesIntersectionPoints(const Vector2& firstCircleOrigin, const float firstCircleRadius, const Vector2& secondCircleOrigin, const float secondCircleRadius);
+    static Vector2 makeVectorFromLengthAndAngle(const float vectorLength, const float angle);
     static float scalarMultiplication(const Vector2& firstVec, const Vector2& secondVec);
     static float findAngleBetweenVectors(const Vector2& firstVec, const Vector2& secondVec);
     static float findRelationalAngleBetweenVectors(const Vector2& mainVec, const Vector2& relationalVec);

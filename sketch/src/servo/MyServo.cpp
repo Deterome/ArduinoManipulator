@@ -1,14 +1,16 @@
 #include "MyServo.h"
 
-MyServo::MyServo(uint8_t pinOnDemultiplexer) : MyServo(pinOnDemultiplexer, 1, AngleOverloadAction::CLAMP, 0, 180, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
+MyServo::MyServo(uint8_t pinOnDemultiplexer) : MyServo(pinOnDemultiplexer, 1, AngleOverloadAction::CLAMP, 0, 0, 180, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
 
-MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, AngleOverloadAction::CLAMP, 0, 180*angleIncreaseCoef, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
+MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, AngleOverloadAction::CLAMP, 0, 0, 180*angleIncreaseCoef, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
 
-MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, angleOverloadAction, 0, 180*angleIncreaseCoef, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
+MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, angleOverloadAction, 0, 0, 180*angleIncreaseCoef, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
 
-MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction, uint16_t lowerAngleLimit, uint16_t upperAngleLimit) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, angleOverloadAction, lowerAngleLimit, upperAngleLimit, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
+MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction, int16_t angleShift) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, angleOverloadAction, angleShift, 0, 180*angleIncreaseCoef, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
 
-MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction, uint16_t lowerAngleLimit, uint16_t upperAngleLimit, uint16_t minWidthOfPulse, uint16_t maxWidthOfPulse) {
+MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction, int16_t angleShift, uint16_t lowerAngleLimit, uint16_t upperAngleLimit) : MyServo(pinOnDemultiplexer, angleIncreaseCoef, angleOverloadAction, angleShift, lowerAngleLimit, upperAngleLimit, DEFAULT_MIN_SERVO180_MICROS, DEFAULT_MAX_SERVO180_MICROS) {}
+
+MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverloadAction angleOverloadAction, int16_t angleShift, uint16_t lowerAngleLimit, uint16_t upperAngleLimit, uint16_t minWidthOfPulse, uint16_t maxWidthOfPulse) {
     this->angleIncreaseCoef = angleIncreaseCoef;
     this->lowerAngleLimit = lowerAngleLimit;
     this->upperAngleLimit = upperAngleLimit;
@@ -16,38 +18,69 @@ MyServo::MyServo(uint8_t pinOnDemultiplexer, float angleIncreaseCoef, AngleOverl
     this->minServoMicros = minWidthOfPulse;
     this->maxServoMicros = maxWidthOfPulse;
     this->angleOverloadAction = angleOverloadAction;
+    this->angleShift = angleShift;
     this->setServoAngle(this->lowerAngleLimit);
 }
 
-uint16_t MyServo::getServoAngle() const {
-    return this->servoAngle;
+void MyServo::setInterpolationMode(bool isEnabled) {
+    if (isEnabled) this->interpolatedAngleInMicros = this->servoAngleInMicros;
+    this->isInterpolationEnabled = isEnabled;
 }
 
-uint16_t MyServo::getServoAngleInMicros() const {
-    return this->servoAngleInMicros;
+void MyServo::setInterpolationStep(uint16_t interpolationStep) {
+    this->interpolationStep = interpolationStep;
+}
+
+void MyServo::setAngleShift(int16_t angleShift) {
+    this->angleShift = angleShift;
+    this->setServoAngle(this->servoAngle);
+}
+
+int16_t MyServo::getAngleShift() const { 
+    return this->angleShift; 
+}
+
+bool MyServo::checkIfServoCanRotateOnAngle(float angle) {
+    float newAngle = this->servoAngle + angle;
+    return this->angleOverloadAction == AngleOverloadAction::REPEAT || 
+        newAngle >= this->lowerAngleLimit && newAngle <= this->upperAngleLimit;
+}
+
+float MyServo::getServoAngle() const {
+    return this->servoAngle - this->angleShift;
+}
+
+uint16_t MyServo::getServoAngleInMicros() {
+    if (!isInterpolationEnabled || this->interpolatedAngleInMicros == this->servoAngleInMicros) return this->servoAngleInMicros;
+    else {
+        if (this->interpolatedAngleInMicros < this->servoAngleInMicros) {
+            this->interpolatedAngleInMicros += interpolationStep;
+            if (this->interpolatedAngleInMicros > this->servoAngleInMicros) this->interpolatedAngleInMicros = this->servoAngleInMicros;
+        } else if (this->interpolatedAngleInMicros > this->servoAngleInMicros) {
+            this->interpolatedAngleInMicros -= interpolationStep;
+            if (this->interpolatedAngleInMicros < this->servoAngleInMicros) this->interpolatedAngleInMicros = this->servoAngleInMicros;
+        }
+        return this->interpolatedAngleInMicros;
+    }    
 }
 
 uint8_t MyServo::getPinOnDemultiplexer() const {
     return this->pinOnDemultiplexer;
 }
 
-void MyServo::rotate(int16_t rotationAngle) {
+void MyServo::rotate(float rotationAngle) {
     this->setServoAngle(this->servoAngle + rotationAngle);
 }
 
-void MyServo::setServoAngle(int16_t newServoAngle) {
+void MyServo::setServoAngle(float newServoAngle) {
+    newServoAngle += this->angleShift;
     if (this->servoAngle != newServoAngle) {
         if (this->angleOverloadAction == AngleOverloadAction::CLAMP) {
-            if (newServoAngle < (int16_t)this->lowerAngleLimit) newServoAngle = this->lowerAngleLimit;
-            else if (newServoAngle > (int16_t)this->upperAngleLimit) newServoAngle = this->upperAngleLimit;
+            if (newServoAngle < this->lowerAngleLimit) newServoAngle = this->lowerAngleLimit;
+            else if (newServoAngle > this->upperAngleLimit) newServoAngle = this->upperAngleLimit;
         } else if (this->angleOverloadAction == AngleOverloadAction::REPEAT) {
-            if (newServoAngle < (int16_t)this->lowerAngleLimit) {
-                newServoAngle = this->upperAngleLimit - ((int16_t)this->lowerAngleLimit - newServoAngle);
-            } else if (newServoAngle > (int16_t)this->upperAngleLimit) { 
-                newServoAngle = this->lowerAngleLimit + newServoAngle % this->upperAngleLimit;
-            }
+            newServoAngle = ArduinoDefaultMath::map(newServoAngle, this->lowerAngleLimit, this->upperAngleLimit);
         }
-
         this->servoAngle = newServoAngle;
         this->servoAngleInMicros = this->angleToMicros(newServoAngle/this->angleIncreaseCoef);
     }

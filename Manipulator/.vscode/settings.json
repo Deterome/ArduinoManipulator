@@ -1,0 +1,27 @@
+{
+    "files.associations": {
+        "atomic": "cpp",
+        "charconv": "cpp",
+        "exception": "cpp",
+        "istream": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "ostream": "cpp",
+        "streambuf": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "utility": "cpp",
+        "xlocale": "cpp",
+        "xlocinfo": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "iosfwd": "cpp",
+        "cstddef": "cpp",
+        "initializer_list": "cpp",
+        "cmath": "cpp",
+        "list": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp"
+    }
+}
